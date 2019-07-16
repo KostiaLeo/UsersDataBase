@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/nick"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:hint="nick..." />
+
+        <EditText
+            android:id="@+id/mail"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:hint="mail..."
+            android:inputType="textEmailAddress" />
+
+        <EditText
+            android:id="@+id/pwd"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:hint="password..."
+            android:inputType="textPassword" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_ins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/input_layout"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="Insert user" />
+    <Button
+        android:id="@+id/btn_sel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/input_layout"
+        android:layout_marginTop="8dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:text="Show users" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/btn_ins"
+        android:background="#000000" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_ins"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <ListView
+            android:id="@+id/mainList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>
