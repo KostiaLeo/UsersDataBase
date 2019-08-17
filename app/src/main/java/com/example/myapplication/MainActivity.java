@@ -29,8 +29,10 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MyActivity";
     private EditText nick_inp, mail_inp, pwd_inp;
     private Button ins_btn, sel_btn;
-    public Connection dbConnection;
+    private Connection dbConnection;
     private ListView mailList;
+    private DataBaseOperation dataBaseOperation = new DataBaseOperation(dbConnection);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 new addUserTask().execute();
-                 recreate();
+                Toast.makeText(MainActivity.this, "User added", Toast.LENGTH_SHORT).show();
                 new showUsersTask().execute();
             }
         });
@@ -62,27 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
 //-----------------------------------------------------------------------
 
-    public void makeConnectivity() {
-        String url = "jdbc:mysql://remotemysql.com:3306/fyrqY4YUuY";
-        String username = "fyrqY4YUuY";
-        String password = "xuBvaZEooo";
-
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            dbConnection = DriverManager.getConnection(url, username, password);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-//=========================================================================================
-
     private class addUserTask extends AsyncTask<Void, Void, Void> {
         String insertUser = "INSERT INTO users (nick, mail, pwd) VALUES ('"
                 + nick_inp.getText().toString() + "', '"
@@ -91,25 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            makeConnectivity();
-            try {
-                if (dbConnection != null) {
-                    PreparedStatement addUserrr = dbConnection.prepareStatement(insertUser);
-                    addUserrr.executeUpdate();
-                    dbConnection.close();
-                    Log.d(TAG, "User inserted successful!");
-
-                } else {
-                    Toast.makeText(MainActivity.this, "Insertion was FAILED!", Toast.LENGTH_SHORT).show();
-                }
-
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                Log.d(TAG, "Insert Completed...");
-            }
+            dataBaseOperation.add(insertUser);
             return null;
         }
     }
@@ -118,85 +81,22 @@ public class MainActivity extends AppCompatActivity {
 
     private class showUsersTask extends AsyncTask<Void, Void, Void> {
         String selectUser = "SELECT * FROM users ORDER BY id DESC";
-        List<List<String>> selData = new ArrayList<List<String>>();
-        String[][] finalDataArray;
-        ArrayList<User> users;
+        List<List<String>> selData = new ArrayList<>();
 
         @Override
         protected Void doInBackground(Void... voids) {
-            makeConnectivity();
-            try {
-                System.out.println(dbConnection);
-                if (dbConnection != null) {
-                    PreparedStatement users = dbConnection.prepareStatement(selectUser);
-                    ResultSet result = users.executeQuery();
-                    ResultSetMetaData rsmd = result.getMetaData();
-
-                    int Cols = rsmd.getColumnCount();
-                    int Rows = result.getRow();
-                    while (result.next()) {
-                        List<String> rData = new ArrayList<String>();
-                        int j = 0;
-                        while (j < Cols) {
-                            rData.add(result.getString(j + 1));
-                            j++;
-                        }
-                        selData.add(rData);
-                    }
-                    result.close();
-                } else {
-                    Toast.makeText(MainActivity.this, "Selection was FAILED!", Toast.LENGTH_SHORT).show();
-                }
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            dataBaseOperation.show(selectUser, selData);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            ArrayOperation arrayOperation = new ArrayOperation();
+            ArrayList<User> finalUsers = arrayOperation.remakeArray(selData);
 
-            finalDataArray = new String[selData.size()][];
-            for (int i = 0; i < selData.size(); i++) {
-                ArrayList<String> row = (ArrayList<String>) selData.get(i);
-                finalDataArray[i] = row.toArray(new String[row.size()]);
-            }
-
-            users = new ArrayList<User>();
-
-            for (int i = 0; i < finalDataArray.length; i++) {
-                users.add(new User(finalDataArray[i][1], finalDataArray[i][2], finalDataArray[i][5]));
-            }
-
-            ArrayAdapter<User> adapter = new UserAdapter(MainActivity.this);
+            ArrayAdapter<User> adapter = new UserAdapter(MainActivity.this, finalUsers);
             mailList = findViewById(R.id.mainList);
             mailList.setAdapter(adapter);
-        }
-
-        private class UserAdapter extends ArrayAdapter<User> {
-
-            public UserAdapter(Context context) {
-                super(context, R.layout.item_of_user, users);
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                User user = getItem(position);
-
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext())
-                            .inflate(R.layout.item_of_user, null);
-                }
-                ((TextView) convertView.findViewById(R.id.nick))
-                        .setText(user.getNick());
-                ((TextView) convertView.findViewById(R.id.mail))
-                        .setText(user.getMail());
-                ((TextView) convertView.findViewById(R.id.pwd))
-                        .setText(user.getPwd());
-                return convertView;
-            }
         }
     }
 }
